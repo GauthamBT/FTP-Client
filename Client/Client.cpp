@@ -20,6 +20,7 @@ public:
 
 	int clientSocket;
 
+	//Starting client socket. 
 	Client(string IPAddress, int portnumber, string protocol)
 	{
 		serverAddress.sin_addr.s_addr = inet_addr("127.0.0.1");
@@ -56,6 +57,7 @@ public:
 int main()
 {
 
+	//Initiating client socket. 
 	Client c("127.0.0.1", 8888, "TCP");
 
 	int i = 0;
@@ -65,6 +67,7 @@ int main()
 	char buffer[1024];
 	char filename[20];
 
+	//Connecting to the server. 
 	if(connect(c.clientSocket,(struct sockaddr *) &c.serverAddress, sizeof(c.serverAddress)) < 0)
 	{
 		cerr << "Error in Connect: " << strerror(errno) << endl;
@@ -73,17 +76,20 @@ int main()
 
 	cout << "Client connected" << endl;
 
+	//Identifying to the server. 
+	cout << "Identify to the server" << endl;
 
-	cout << "Enter Message for Server" << endl;
-
+	//Geting input from the user. 
 	cin.getline(buffer, 1024);
 
+	//Sending identification to the server. 
 	if(write(c.clientSocket, buffer, 1024) < 0)
 	{
 		cerr << "Error in write: " << strerror(errno) << endl;
 		exit(0);
 	}
 
+	//To read the file list sent by the server. 
 	if(read(c.clientSocket, buffer, 1024) < 0)
 	{
 		cerr << "Error in Read: " << strerror(errno) << endl;
@@ -92,10 +98,13 @@ int main()
 
 	cout << "Received message: " << endl << buffer << endl;
 
+	//To send the file name. After getting the file list. 
 	cout << "Send file name" << endl;
 
+	//Getting the file name from the user. 
 	cin.getline(filename, 20);
 
+	//Sending the file name to the user. 
 	if(write(c.clientSocket, filename, sizeof(filename)) < 0)
 	{
 		cerr << "Error in write: " << strerror(errno) << endl;
@@ -111,12 +120,15 @@ int main()
 		exit(0);
 	}
 
+	//converting the filesize to int.
 	sscanf(buffer, "%d", &fileSize);
 
 	cout << "File size is: " << fileSize << endl;
 
+	//Creating the file received from the server. 
 	file.open(filename, ios::out | ios::app | ios::binary);
 
+	//Received the file till the end of the file. 
 	while(fileSize > 0)
 	{
 		readSize = read(c.clientSocket, buffer, 1);
@@ -128,8 +140,10 @@ int main()
 
 	cout << "File received" << endl;
 
+	//Closing the file after saving it. 
 	file.close();
 
+	//Interaction ended with the server. Closing socket. 
 	close(c.clientSocket);
 
 	return 0;
